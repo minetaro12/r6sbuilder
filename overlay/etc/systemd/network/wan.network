@@ -1,6 +1,0 @@
-[Match]
-Name=wan
-
-[Network]
-DHCP=yes
-DNSSEC=no
