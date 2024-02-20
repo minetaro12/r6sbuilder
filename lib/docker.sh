@@ -89,11 +89,14 @@ EOF
 # モジュールのコピー
 cp -a /mnt/base_rootfs/lib/modules /mnt/rootfs/lib/
 
-# パスワードの設定(初期rootパスワードはroot)
-# echo "root:root" | chroot /mnt/rootfs chpasswd
+# ubuntuユーザーの作成
+chroot /mnt/rootfs useradd -m -s /bin/bash -G sudo ubuntu
+
+# パスワードの設定(ubuntu:ubuntu)
+echo "ubuntu:ubuntu" | chroot /mnt/rootfs chpasswd
 
 # 次回ログイン時にパスワードを変更するように設定
-# chroot /mnt/rootfs passwd -e root
+chroot /mnt/rootfs passwd -e ubuntu
 
 # ホスト名の設定
 echo "nanopi-r6s" > /mnt/rootfs/etc/hostname
