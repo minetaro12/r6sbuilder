@@ -104,9 +104,6 @@ echo "nanopi-r6s" > /mnt/rootfs/etc/hostname
 # overlayファイルのコピ
 cp -r ./overlay/* /mnt/rootfs/
 
-# 初回起動用サービスの有効化
-chroot /mnt/rootfs systemctl enable firstboot
-
 # sshの設定
 # chroot /mnt/rootfs sed -i "s/#PermitRootLogin prohibit-password/PermitRootLogin yes/" /etc/ssh/sshd_config
 
