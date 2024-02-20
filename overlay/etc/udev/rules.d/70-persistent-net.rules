@@ -1,0 +1,3 @@
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="r8125", KERNELS=="0003:31:00.0", NAME:="wan"
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="r8125", KERNELS=="0004:41:00.0", NAME:="lan1"
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", KERNELS=="fe1c0000.ethernet", NAME:="lan2"

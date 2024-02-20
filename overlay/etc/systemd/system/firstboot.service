@@ -1,0 +1,11 @@
+[Unit]
+Description=First Boot Service
+After=network.target
+
+[Service]
+ExecStart=/bin/bash /firstboot.sh
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
