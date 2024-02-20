@@ -1,6 +1,6 @@
 # r6sbuilder
-NanoPi R6S用Ubuntuイメージビルダー  
-Armbianカーネルを使用し、Ubuntu 22.04のイメージを作成します
+NanoPi R6S用Arch Linuxイメージビルダー  
+Armbianカーネルを使用し、Arch Linuxのイメージを作成します
 
 ## 環境
 - Dockerがインストール済み
@@ -13,7 +13,7 @@ $ ./build.sh
 `./out`ディレクトリ内に出力されます
 
 ## 変更点
-- 初期ユーザー名は`ubuntu`パスワードは`ubuntu`
+- 初期rootパスワードは`root`です
 - NICはすべてDHCPでIPアドレス取得
 
 ## TODO

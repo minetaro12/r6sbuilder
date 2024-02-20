@@ -1,0 +1,6 @@
+[Match]
+Name=lan*
+
+[Network]
+DHCP=yes
+DNSSEC=no

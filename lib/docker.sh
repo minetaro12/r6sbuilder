@@ -3,13 +3,14 @@
 ## Docker内で実行されるスクリプト
 
 BASE_IMAGE="https://github.com/armbian/community/releases/download/24.5.0-trunk.19/Armbian_community_24.5.0-trunk.19_Nanopi-r6s_bookworm_legacy_5.10.160_minimal.img.xz"
-OUTPUT_IMAGE="out/Ubuntu-22.04_Nanopi-r6s_$(date +%Y%m%d%H%M).img"
+ARCH_IMAGE="http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz"
+OUTPUT_IMAGE="out/archlinux_nanopi-r6s_$(date +%Y%m%d%H%M).img"
 
 NEED_PACKAGES=(
   curl
-  debootstrap
   dosfstools
   fdisk
+  libarchive-tools
   qemu-user-static
   xz-utils
 )
@@ -65,9 +66,17 @@ mount ${LOOP_BASE}p2 /mnt/base_rootfs || error_check "Failed to mount"
 # /bootのコピー
 cp -a /mnt/base_bootfs/* /mnt/bootfs/
 
-# Ubuntuのrootfsの作成
+# Arch Linuxのrootfsの作成
 mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
-debootstrap --arch=arm64 --include=openssh-server jammy /mnt/rootfs http://ports.ubuntu.com/ubuntu-ports/ || error_check "Failed to debootstrap"
+rm -rf base/rootfs
+mkdir base/rootfs
+curl -L $ARCH_IMAGE | bsdtar -xpv -C base/rootfs || error_check "Failed to extract Arch Linux rootfs"
+
+# 不要パッケージの削除
+chroot base/rootfs pacman -Rs --noconfirm linux-aarch64 linux-firmware || error_check "Failed to remove packages"
+
+# イメージにコピー
+cp -a base/rootfs/* /mnt/rootfs/ || error_check "Failed to copy rootfs"
 
 # armbianEnv.txtの作成
 cat <<EOF > /mnt/bootfs/armbianEnv.txt
@@ -89,11 +98,14 @@ EOF
 # モジュールのコピー
 cp -a /mnt/base_rootfs/lib/modules /mnt/rootfs/lib/
 
-# パスワードの設定(初期rootパスワードはroot)
-# echo "root:root" | chroot /mnt/rootfs chpasswd
+# alarmユーザーの削除
+chroot /mnt/rootfs userdel -r alarm
 
-# 次回ログイン時にパスワードを変更するように設定
-# chroot /mnt/rootfs passwd -e root
+# パスワードの設定(初期rootパスワードはroot)
+echo "root:root" | chroot /mnt/rootfs chpasswd
+
+# 次回ログイン時にrootのパスワードを変更するように設定
+chroot /mnt/rootfs passwd -e root
 
 # ホスト名の設定
 echo "nanopi-r6s" > /mnt/rootfs/etc/hostname
@@ -101,20 +113,12 @@ echo "nanopi-r6s" > /mnt/rootfs/etc/hostname
 # overlayファイルのコピ
 cp -r ./overlay/* /mnt/rootfs/
 
-# 初回起動用サービスの有効化
-chroot /mnt/rootfs systemctl enable firstboot
-
 # sshの設定
-# chroot /mnt/rootfs sed -i "s/#PermitRootLogin prohibit-password/PermitRootLogin yes/" /etc/ssh/sshd_config
-
-# stub-resolv.confの削除
-rm -f /mnt/rootfs/run/systemd/resolve/stub-resolv.conf
+chroot /mnt/rootfs sed -i "s/^#PermitRootLogin prohibit-password/PermitRootLogin yes/" /etc/ssh/sshd_config
 
 # machine-idの削除
 rm -f /mnt/rootfs/var/lib/dbus/machine-id
 echo -n > /mnt/rootfs/etc/machine-id
-
-chroot /mnt/rootfs apt clean
 
 # アンマウント
 sync
