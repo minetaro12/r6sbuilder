@@ -3,7 +3,7 @@
 ## Docker内で実行されるスクリプト
 
 BASE_IMAGE="https://github.com/armbian/community/releases/download/24.5.0-trunk.19/Armbian_community_24.5.0-trunk.19_Nanopi-r6s_bookworm_legacy_5.10.160_minimal.img.xz"
-OUTPUT_IMAGE="out/Ubuntu-22.04_Nanopi-r6s_$(date +%Y%m%d%H%M).img"
+OUTPUT_IMAGE="out/ubuntu-22.04_nanopi-r6s_$(date +%Y%m%d%H%M).img"
 
 NEED_PACKAGES=(
   curl
