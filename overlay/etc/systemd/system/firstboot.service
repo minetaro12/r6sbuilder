@@ -1,6 +1,7 @@
 [Unit]
 Description=First Boot Service
 After=network.target
+After=ssh.service
 
 [Service]
 ExecStart=/bin/bash /firstboot.sh
