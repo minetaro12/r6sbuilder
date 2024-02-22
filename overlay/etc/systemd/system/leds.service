@@ -1,0 +1,26 @@
+[Unit]
+Description=LED Settings
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "echo netdev > /sys/class/leds/lan1_led/trigger"
+ExecStart=/bin/bash -c "echo netdev > /sys/class/leds/lan2_led/trigger"
+ExecStart=/bin/bash -c "echo netdev > /sys/class/leds/wan_led/trigger"
+
+ExecStart=/bin/bash -c "echo lan1 > /sys/class/leds/lan1_led/device_name"
+ExecStart=/bin/bash -c "echo lan2 > /sys/class/leds/lan2_led/device_name"
+ExecStart=/bin/bash -c "echo wan > /sys/class/leds/wan_led/device_name"
+
+ExecStart=/bin/bash -c "echo 1 > /sys/class/leds/lan1_led/tx"
+ExecStart=/bin/bash -c "echo 1 > /sys/class/leds/lan1_led/rx"
+ExecStart=/bin/bash -c "echo 1 > /sys/class/leds/lan1_led/link"
+ExecStart=/bin/bash -c "echo 1 > /sys/class/leds/lan2_led/tx"
+ExecStart=/bin/bash -c "echo 1 > /sys/class/leds/lan2_led/rx"
+ExecStart=/bin/bash -c "echo 1 > /sys/class/leds/lan2_led/link"
+ExecStart=/bin/bash -c "echo 1 > /sys/class/leds/wan_led/tx"
+ExecStart=/bin/bash -c "echo 1 > /sys/class/leds/wan_led/rx"
+ExecStart=/bin/bash -c "echo 1 > /sys/class/leds/wan_led/link"
+
+[Install]
+WantedBy=multi-user.target
