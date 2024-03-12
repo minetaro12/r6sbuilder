@@ -2,7 +2,6 @@
 
 ## Docker内で実行されるスクリプト
 
-BASE_IMAGE="https://github.com/armbian/community/releases/download/24.5.0-trunk.19/Armbian_community_24.5.0-trunk.19_Nanopi-r6s_bookworm_legacy_5.10.160_minimal.img.xz"
 OUTPUT_IMAGE="out/ubuntu-22.04_nanopi-r6s_$(date +%Y%m%d%H%M).img"
 
 NEED_PACKAGES=(
@@ -16,7 +15,7 @@ NEED_PACKAGES=(
 
 function cleanup() {
   umount /mnt/*
-  losetup -d $LOOP_BASE $LOOP_OUT
+  losetup -d $LOOP_OUT
 }
 
 function error_check() {
@@ -30,40 +29,30 @@ function error_check() {
 apt update
 apt install -y ${NEED_PACKAGES[@]}
 
-# ベースイメージのダウンロード
-if [ -e base/base.img ]; then
-  echo "Base image already exists"
-else
-  curl -L $BASE_IMAGE | unxz > base/base.img
-fi
-
 # 出力イメージの作成
 truncate -s 1GB $OUTPUT_IMAGE
 
 # ループバックデバイスの作成
-LOOP_BASE=$(losetup -fPr --show base/base.img) || error_check "Failed to create loop device"
-LOOP_OUT=$(losetup -fP --show $OUTPUT_IMAGE)   || error_check "Failed to create loop device"
+LOOP_OUT=$(losetup -fP --show $OUTPUT_IMAGE) || error_check "Failed to create loop device"
 
 # パーティションの作成
 sfdisk $LOOP_OUT < partmap || error_check "Failed to create partition"
 
 # ブートローダーのコピー
-dd if=$LOOP_BASE of=$LOOP_OUT skip=31 seek=31 bs=512 count=32736 || error_check "Failed to copy bootloader"
+dd if=./base/loader.img of=$LOOP_OUT seek=31 bs=512 count=32736 || error_check "Failed to copy bootloader"
 
 # ファイルシステムの作成
 mkfs.vfat -n bootfs -F32 ${LOOP_OUT}p1 || error_check "Failed to create filesystem"
 mkfs.ext4 -L rootfs ${LOOP_OUT}p2      || error_check "Failed to create filesystem"
 
 # マウント
-mkdir /mnt/bootfs /mnt/rootfs /mnt/base_bootfs /mnt/base_rootfs
+mkdir /mnt/bootfs /mnt/rootfs
 
 mount ${LOOP_OUT}p1 /mnt/bootfs || error_check "Failed to mount"
 mount ${LOOP_OUT}p2 /mnt/rootfs || error_check "Failed to mount"
-mount ${LOOP_BASE}p1 /mnt/base_bootfs || error_check "Failed to mount"
-mount ${LOOP_BASE}p2 /mnt/base_rootfs || error_check "Failed to mount"
 
 # /bootのコピー
-cp -a /mnt/base_bootfs/* /mnt/bootfs/
+tar xzvf ./base/bootfs.tgz -C /mnt/bootfs || error_check "Failed to extract bootfs"
 
 # Ubuntuのrootfsの作成
 mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
@@ -87,7 +76,8 @@ tmpfs /tmp tmpfs defaults,nosuid 0 0
 EOF
 
 # モジュールのコピー
-cp -a /mnt/base_rootfs/lib/modules /mnt/rootfs/lib/
+rm -rf /mnt/rootfs/lib/modules
+tar xzvf ./base/modules.tgz -C /mnt/rootfs/lib || error_check "Failed to extract modules"
 
 # ubuntuユーザーの作成
 chroot /mnt/rootfs useradd -m -s /bin/bash -G sudo ubuntu
