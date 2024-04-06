@@ -11,7 +11,7 @@ fi
 cd $SRC_DIR
 
 # 作業用ディレクトリの作成
-mkdir -p out base
+mkdir -p out
 
 docker run -it --rm --privileged \
   --name r6s-builder \
