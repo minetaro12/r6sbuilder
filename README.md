@@ -1,6 +1,6 @@
 # r6sbuilder
 NanoPi R6S用Ubuntuイメージビルダー  
-Armbianカーネルを使用し、Ubuntu 22.04のイメージを作成します
+Armbianカーネルを使用し、Ubuntu 24.04のイメージを作成します
 
 ## 環境
 - Dockerがインストール済み

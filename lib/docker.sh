@@ -2,7 +2,7 @@
 
 ## Docker内で実行されるスクリプト
 
-OUTPUT_IMAGE="out/ubuntu-22.04_nanopi-r6s_$(date +%Y%m%d%H%M).img"
+OUTPUT_IMAGE="out/ubuntu-24.04_nanopi-r6s_$(date +%Y%m%d%H%M).img"
 
 NEED_PACKAGES=(
   curl
@@ -27,7 +27,7 @@ function error_check() {
 
 # 必要なパッケージをインストール
 apt update
-apt install -y ${NEED_PACKAGES[@]}
+apt install -y ${NEED_PACKAGES[@]} --no-install-recommends
 
 # 出力イメージの作成
 truncate -s 1GB $OUTPUT_IMAGE
@@ -56,7 +56,7 @@ tar xzvf ./base/bootfs.tgz -C /mnt/bootfs || error_check "Failed to extract boot
 
 # Ubuntuのrootfsの作成
 mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
-debootstrap --arch=arm64 --include=openssh-server jammy /mnt/rootfs http://ports.ubuntu.com/ubuntu-ports/ || error_check "Failed to debootstrap"
+debootstrap --arch=arm64 --include=openssh-server noble /mnt/rootfs http://ports.ubuntu.com/ubuntu-ports/ || error_check "Failed to debootstrap"
 
 # armbianEnv.txtの作成
 cat <<EOF > /mnt/bootfs/armbianEnv.txt

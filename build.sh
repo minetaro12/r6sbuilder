@@ -18,7 +18,7 @@ docker run -it --rm --privileged \
   -v /dev:/dev \
   -v $SRC_DIR:/work \
   -w /work \
-  ubuntu:22.04 \
+  ubuntu:24.04 \
   bash /work/lib/docker.sh
 
 if [ $? -ne 0 ]; then
